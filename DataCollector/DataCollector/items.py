@@ -7,8 +7,15 @@
 
 import scrapy
 
-
-class DatacollectorItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+class ResearchPaperItem(scrapy.Item):
+    ID=scrapy.Field()
+    Link=scrapy.Field()
+    Title=scrapy.Field()
+    Abstract=scrapy.Field()
+    Authors=scrapy.Field()
+    Published_in=scrapy.Field()
+    Publication_date=scrapy.Field()
+    References=scrapy.Field()
+    References_links=scrapy.Field()
+    Cited_by=scrapy.Field()
+    Cited_by_links=scrapy.Field()
