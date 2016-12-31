@@ -1,6 +1,8 @@
 import json
 import hashlib
 import pdb
+import pickle
+import networkx as nx
 
 class DataPreProcessor:
 
@@ -147,8 +149,6 @@ class DataPreProcessor:
 
         self.save()
 
-
-
 class BuildGraph:
 
     def __init__(self):
@@ -211,6 +211,63 @@ class BuildGraph:
         self.build_graph()
         self.save()
 
+class BuildNetworkXGraph:
+
+    def __init__(self):
+        self.graph = nx.DiGraph()
+        self.graph_file_name='nx_graph.gpickle'
+        self.json_graph={}
+        self.hash_to_info={}
+        self.hash_to_title={}
+
+    def load_data(self):
+
+        """
+            loads all three data source required for doing anything
+        """
+
+        with open('hash_to_title.json') as json_data:
+            self.hash_to_title = json.load(json_data)
+            json_data.close()
+
+        with open('hash_to_info.json') as json_data:
+            self.hash_to_info = json.load(json_data)
+            json_data.close()
+
+        with open('graph.json') as json_data:
+            self.json_graph = json.load(json_data)
+            json_data.close()
+
+    def buildGraph(self):
+        for k,v in self.json_graph.items():
+
+            if not self.graph.has_node(k):
+                self.graph.add_node(k)
+
+            # add references
+            for ref in v['References']:
+                if not self.graph.has_node(ref):
+                    self.graph.add_node(ref)
+                self.graph.add_edge(k,ref)
+
+
+            # add cited_By
+            for c_by in v['Cited_by']:
+                if not self.graph.has_node(c_by):
+                    self.graph.add_node(c_by)
+                self.graph.add_edge(c_by,k)
+
+
+    def saveGraph(self):
+        #saves as pickle
+        nx.write_gpickle(self.graph, self.graph_file_name)
+        print("Graph saved as pickle {}".format(self.graph_file_name))
+
+    def process(self):
+        self.load_data()
+        self.buildGraph()
+        self.saveGraph()
+
 
 if __name__ == '__main__':
 
@@ -230,6 +287,14 @@ if __name__ == '__main__':
         hash_to_title will contain [hash] to title text
         hash_to_info will contain [hash] to all information about that article
 
+        output is simple json file
+
     """
-    buildGraph = BuildGraph()
-    buildGraph.process()
+    # buildGraph = BuildGraph()
+    # buildGraph.process()
+
+    """
+        Convert the simple json to networkx DiGraph
+    """
+    buildNxGraph = BuildNetworkXGraph()
+    buildNxGraph.process()
